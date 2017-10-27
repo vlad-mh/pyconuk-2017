@@ -19,7 +19,21 @@ services:
       - .:/usr/src/app/
     links:
       - datadog
+      - thinker
     ports:
       - "5000:5000"
+    networks:
+      - default
+  thinker:
+    image: makospince/pyconuk-2017:latest
+    environment:
+      - FLASK_APP=api.py
+    command: python thinker.py
+    volumes:
+      - .:/usr/src/app/
+    links:
+      - datadog
+    ports:
+      - "5001:8000"
     networks:
       - default
