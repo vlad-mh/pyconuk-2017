@@ -1,9 +1,12 @@
 import asyncio
 import logging
+import pickle
+
+import redis
 
 from aiohttp import web
 
-from ddtrace import tracer
+from ddtrace import tracer, patch
 from ddtrace.contrib.aiohttp import trace_app
 
 from thoughts import thoughts
@@ -16,13 +19,26 @@ logger = logging.getLogger(__name__)
 # Tracer configuration
 tracer.configure(hostname='datadog')
 
+# Configure Redis
+# This will report a span with the default settings
+redis_client = redis.StrictRedis(host='redis', port=6379)
+patch(redis=True)
+
 
 @tracer.wrap(name='think')
 async def think(subject):
     tracer.current_span().set_tag('subject', subject)
 
+    cached_thought = redis_client.get(subject)
+    if cached_thought:
+        return pickle.loads(cached_thought)
+
     await asyncio.sleep(0.5)
-    return thoughts[subject]
+
+    thought = thoughts[subject]
+    redis_client.set(subject, pickle.dumps(thought))
+
+    return thought
 
 
 async def handle(request):

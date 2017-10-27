@@ -10,6 +10,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc/mounts:/host/proc/mounts:ro
       - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+  redis:
+    image: redis:latest
   api:
     image: makospince/pyconuk-2017:latest
     environment:
@@ -33,6 +35,7 @@ services:
       - .:/usr/src/app/
     links:
       - datadog
+      - redis
     ports:
       - "5001:8000"
     networks:
