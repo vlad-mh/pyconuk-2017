@@ -1,0 +1,17 @@
+version: '3'
+services:
+  datadog:
+    image: datadog/docker-dd-agent:latest
+    environment:
+      - DD_HOSTNAME=pyconuk
+      - DD_API_KEY=b099f6754c73e62396cf0a02f540e563
+      - DD_APM_ENABLED=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/mounts:/host/proc/mounts:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+  api:
+    image: makospince/pyconuk-2017:latest
+    command: python api.py
+    volumes:
+      - .:/usr/src/app/
